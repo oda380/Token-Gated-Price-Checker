@@ -123,7 +123,6 @@ export default function PriceForm({
               autoCapitalize="characters"
               spellCheck={false}
               aria-autocomplete="list"
-              aria-expanded={open}
               aria-controls="ticker-suggestions"
             />
             {/* Dropdown */}

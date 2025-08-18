@@ -6,6 +6,10 @@ export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 import { normalizeInput, resolveToId, loadIndex } from '@/lib/cgIndex'
 
+function errMsg(e: unknown) {
+    return e instanceof Error ? e.message : String(e);
+  }
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
@@ -28,7 +32,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ items: [] })
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Search error' }, { status: 500 })
+} catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) || 'Search error' }, { status: 500 });
   }
 }

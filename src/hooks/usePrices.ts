@@ -7,21 +7,18 @@ import { useQuery } from '@tanstack/react-query'
    Typed JSON fetch helper (generic lives HERE so TS sees it)
 ------------------------------------------------------------- */
 export const j = async <T,>(resOrPromise: Response | Promise<Response>): Promise<T> => {
-  const res = await resOrPromise
-  const text = await res.text()
-
-  let json: unknown = null
-  try { json = JSON.parse(text) } catch { /* non-JSON body */ }
-
-  if (!res.ok) {
-    const msg =
-      (json && typeof json === 'object' && 'error' in (json as any) && (json as any).error) ||
-      text ||
-      `HTTP ${res.status}`
-    throw new Error(String(msg))
-  }
-  return (json as T) ?? ({} as T)
-}
+    const res = await resOrPromise;
+    const text = await res.text();
+    let json: unknown = null;
+    try { json = JSON.parse(text); } catch {}
+    if (!res.ok) {
+      const msg = (json && typeof json === 'object' && 'error' in (json as any))
+        ? (json as { error?: unknown }).error
+        : text || `HTTP ${res.status}`;
+      throw new Error(String(msg));
+    }
+    return (json as T) ?? ({} as T);
+  };
 
 /* -------------------------------------------------------------
    Types matching /api/price response

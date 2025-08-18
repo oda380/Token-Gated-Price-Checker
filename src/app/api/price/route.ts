@@ -15,6 +15,8 @@ const headers = () => {
   return h
 }
 
+
+
 // nearest in array of [ms, price]
 function nearestPoint(points: [number, number][], targetMs: number) {
   if (!Array.isArray(points) || points.length === 0) return null
@@ -26,6 +28,11 @@ function nearestPoint(points: [number, number][], targetMs: number) {
   }
   return best
 }
+
+// helper to extract message
+function errMsg(e: unknown) {
+    return e instanceof Error ? e.message : String(e);
+  }
 
 export async function POST(req: Request) {
   try {
@@ -71,7 +78,9 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: `CoinGecko range error: ${text || res.status}` }, { status: 400 })
       }
       const json = await res.json()
-      const prices = (json?.prices ?? []) as [number, number][]
+      const prices = Array.isArray((json as { prices?: unknown }).prices)
+  ? ((json as { prices: [number, number][] }).prices)
+  : [];
       const pick = nearestPoint(prices, t)
       if (!pick) {
         return NextResponse.json({
@@ -119,7 +128,7 @@ export async function POST(req: Request) {
         at: undefined
       })
     }
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Server error' }, { status: 500 })
+    } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) || 'Server error' }, { status: 500 });
   }
 }

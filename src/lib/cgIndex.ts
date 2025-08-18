@@ -59,21 +59,29 @@ export function normalizeInput(raw: string) {
   return String(raw ?? '').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/^\$/, '').trim()
 }
 
+type CGSearchCoin = {
+    id: string;
+    api_symbol?: string;
+    name: string;
+    symbol: string;
+    market_cap_rank?: number | null;
+  };
+
 // 🔎 Ranked search using CoinGecko /search (includes market_cap_rank)
 async function cgSearch(query: string): Promise<Array<{ id: string; symbol: string; name: string; rank?: number }>> {
-  const url = new URL(`${CG}/search`)
-  url.searchParams.set('query', query)
-  const res = await fetch(url.toString(), { headers: headers(), cache: 'no-store' })
-  if (!res.ok) return []
-  const json = await res.json()
-  const coins = Array.isArray(json?.coins) ? json.coins : []
-  return coins.map((c: any) => ({
-    id: String(c.id),
-    symbol: String(c.symbol || '').toUpperCase(),
-    name: String(c.name || ''),
-    rank: typeof c.market_cap_rank === 'number' ? c.market_cap_rank : undefined,
-  }))
-}
+    const url = new URL(`${CG}/search`);
+    url.searchParams.set('query', query);
+    const res = await fetch(url.toString(), { headers: headers(), cache: 'no-store' });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { coins?: CGSearchCoin[] };
+    const coins = Array.isArray(json?.coins) ? json.coins : [];
+    return coins.map((c) => ({
+      id: c.id,
+      symbol: String(c.symbol || '').toUpperCase(),
+      name: c.name,
+      rank: typeof c.market_cap_rank === 'number' ? c.market_cap_rank : undefined,
+    }));
+  }
 
 export async function resolveToId(input: string): Promise<ResolveResult> {
   const idx = await loadIndex()

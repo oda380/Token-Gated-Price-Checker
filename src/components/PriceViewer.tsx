@@ -103,8 +103,8 @@ export default function PriceViewer() {
         perUnit,
         raw: json
       })
-    } catch (e: any) {
-      setError(e?.message || 'Request failed')
+    }  catch (e: unknown) {
+        setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false)
     }
