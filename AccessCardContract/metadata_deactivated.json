@@ -1,9 +1,0 @@
-{
-    "name": "Access Card",
-    "description": "The access token for Crypto Price Checker App is disabled.",
-    "image": "ipfs://<IMAGE_CID>/card.png",
-    "attributes": [
-      { "trait_type": "Tier", "value": "Deactivated" }
-    ]
-  }
-  
