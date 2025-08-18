@@ -1,0 +1,9 @@
+{
+    "name": "Access Card",
+    "description": "Access pass for Crypto Price Checker App.",
+    "image": "ipfs://bafybeigffvg5ddyzmzbkt4f3assgjmzi7au55x2wwdv36pf2vd6hnbrvxa/accesscard.png",
+    "attributes": [
+      { "trait_type": "Tier", "value": "Active" }
+    ]
+  }
+  

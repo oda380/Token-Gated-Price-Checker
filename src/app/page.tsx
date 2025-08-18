@@ -6,7 +6,6 @@ export default function Page() {
   return (
     <main className="max-w-2xl mx-auto p-6 space-y-8">
       <h1 className="text-2xl font-bold">Token Gated Prices</h1>
-      <p className="text-sm opacity-80">Connect and sign in with your wallet to access the dashboard.</p>
 
       {/* Single button for Connect + SIWE (your patched Login.tsx) */}
       <Login />

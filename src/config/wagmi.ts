@@ -1,21 +1,17 @@
-import { http } from 'viem'
-import { base } from 'viem/chains'
-import { cookieStorage, createStorage, createConfig } from 'wagmi'
-import { injected } from '@wagmi/connectors'
 
-if (!process.env.NEXT_PUBLIC_ALCHEMY_HTTP_URL) {
-  throw new Error('NEXT_PUBLIC_ALCHEMY_HTTP_URL is not set')
-}
 
-export const config = createConfig({
-  ssr: true,
+// src/config/wagmi.ts
+'use client'
+
+import { getDefaultConfig } from '@rainbow-me/rainbowkit'
+import { base } from 'wagmi/chains'
+import { http } from 'wagmi'
+
+const wcProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!
+export const config = getDefaultConfig({
+  appName: 'Token-Gated Price Checker',
+  projectId: wcProjectId,           // enables WalletConnect QR in the modal
   chains: [base],
-  connectors: [
-    injected({ shimDisconnect: true }),
-    // Add more connectors later (e.g., walletConnect) if you want
-  ],
-  storage: createStorage({ storage: cookieStorage }),
-  transports: {
-    [base.id]: http(process.env.NEXT_PUBLIC_ALCHEMY_HTTP_URL!),
-  },
+  transports: { [base.id]: http(process.env.NEXT_PUBLIC_ALCHEMY_HTTP_URL) }, // or your Alchemy/Infura http(url)
+  ssr: true,
 })

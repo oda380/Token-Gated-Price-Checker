@@ -4,8 +4,8 @@ import ContextProvider from '@/context/provider'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'My Gated Prices',
-  description: 'Token-gated crypto prices'
+  title: 'Token Gated Price Checker',
+  description: 'Token-gated crypto price checker'
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
