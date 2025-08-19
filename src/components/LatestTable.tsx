@@ -1,6 +1,6 @@
 'use client'
 
-import { useLatestPrices, type LatestResp } from '@/hooks/usePrices'
+import { useLatestPrices, type PriceOk, type PriceResp } from '@/hooks/usePrices'
 
 type Props = {
   tickers: string[]
@@ -33,7 +33,7 @@ export default function LatestTable({ tickers, currency }: Props) {
   )
 }
 
-function LatestRow({ ticker, currency }: { ticker: string; currency: 'USD'|'EUR' }) {
+function LatestRow({ ticker, currency }: { ticker: string; currency: 'USD' | 'EUR' }) {
   const { data, isLoading, error } = useLatestPrices(ticker, currency)
 
   if (isLoading) return row(ticker, currency, 'Loading…', '—', 'loading')
@@ -41,19 +41,19 @@ function LatestRow({ ticker, currency }: { ticker: string; currency: 'USD'|'EUR'
   if (!data) return row(ticker, currency, '—', '—')
 
   if ('error' in data) {
-    const extra = data.suggestions?.length ? ` · Did you mean: ${data.suggestions.map(s=>s.symbol).join(', ')}` : ''
+    const extra = data.suggestions?.length ? ` · Did you mean: ${data.suggestions.map(s => s.symbol).join(', ')}` : ''
     return row(ticker, currency, data.error + extra, '—', 'warning')
   }
 
-
+  const priceData = data as PriceOk
   const priceColor = 'text-white' 
 
   return (
     <tr className="border-t border-slate-700 hover:bg-slate-700 transition-colors">
-      <td className="py-2 pr-4 text-purple-400 font-semibold">{data.symbol ?? ticker.toUpperCase()}</td>
-      <td className="py-2 pr-4 text-gray-400">{data.convert}</td>
-      <td className={`py-2 pr-4 ${priceColor}`}>{fmt(data.pricePerUnit)}</td>
-      <td className="py-2 pr-4 text-gray-500">{data.lastUpdated ?? '—'}</td>
+      <td className="py-2 pr-4 text-purple-400 font-semibold">{priceData.symbol ?? ticker.toUpperCase()}</td>
+      <td className="py-2 pr-4 text-gray-400">{priceData.convert}</td>
+      <td className={`py-2 pr-4 ${priceColor}`}>{fmt(priceData.pricePerUnit)}</td>
+      <td className="py-2 pr-4 text-gray-500">{priceData.lastUpdated ?? '—'}</td>
     </tr>
   )
 }
