@@ -61,14 +61,12 @@ export default function PriceViewer() {
         cache: 'no-store'
       })
 
-      // Try to parse JSON either way for richer errors
       const text = await res.text()
       let json: any = null
       try { json = JSON.parse(text) } catch { /* non-JSON error */ }
 
       if (!res.ok) {
         const msg = (json && json.error) || text || `HTTP ${res.status}`
-        // surface suggestions if ambiguous (409)
         if (json?.suggestions?.length) {
           setResult({
             from: input.toUpperCase(),
@@ -81,10 +79,6 @@ export default function PriceViewer() {
         throw new Error(msg)
       }
 
-      // Unified success shape:
-      // {
-      //   ok: true, id, symbol?, name?, convert, amount, pricePerUnit, total, lastUpdated?, at?
-      // }
       const data = json
       if (!data?.ok || typeof data.pricePerUnit !== 'number') {
         throw new Error('No price data returned for that ticker/currency')
@@ -111,7 +105,7 @@ export default function PriceViewer() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
       <PriceForm
         value={form}
         onChange={(p) => setForm({ ...form, ...p })}
@@ -121,23 +115,23 @@ export default function PriceViewer() {
       />
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3">
-          <p className="text-sm text-red-600 whitespace-pre-wrap">{error}</p>
+        <div className="rounded-lg border border-red-800 bg-red-950 p-4 space-y-3">
+          <p className="text-sm text-red-400 whitespace-pre-wrap">{error}</p>
           {result?.suggestions?.length ? (
-            <div className="mt-2 text-sm">
+            <div className="mt-2 text-sm text-gray-300">
               <p className="font-medium">Did you mean:</p>
-              <ul className="list-disc ml-5">
+              <ul className="list-disc ml-5 space-y-1">
                 {result.suggestions.map(s => (
                   <li key={s.id}>
                     <button
                       type="button"
-                      className="underline hover:no-underline"
+                      className="font-semibold text-purple-400 hover:text-purple-500 transition-colors"
                       onClick={() => setForm(f => ({ ...f, ticker: s.symbol }))}
                     >
                       {s.symbol}
                     </button>
-                    {s.name ? <span className="opacity-70"> — {s.name}</span> : null}
-                    <span className="opacity-60"> ({s.slug})</span>
+                    {s.name ? <span className="text-gray-400"> — {s.name}</span> : null}
+                    <span className="text-gray-500"> ({s.slug})</span>
                   </li>
                 ))}
               </ul>
@@ -147,21 +141,23 @@ export default function PriceViewer() {
       )}
 
       {result && (result.value != null) && (
-        <div className="rounded-2xl border p-4 space-y-3 bg-gray-50">
-          <h4 className="font-semibold">Result</h4>
-          <p className="text-base">
-            <strong>{result.amount} {result.from}</strong>
-            {' '}= <strong>{result.currency} {fmt2(result.value)}</strong>
+        <div className="rounded-2xl border border-slate-700 p-6 space-y-4 bg-slate-800 text-white">
+          <h4 className="font-bold text-xl">Result</h4>
+          <p className="text-base text-gray-300">
+            <strong className="text-purple-400">{result.amount} {result.from}</strong>
+            {' '}= <strong className="text-white">{result.currency} {fmt2(result.value)}</strong>
             {' '}
-            {result.at ? <>@ <span className="opacity-80">{result.at} UTC</span></> : <>@ <span className="opacity-80">now</span></>}
+            {result.at ? <>@ <span className="text-gray-400">{result.at} UTC</span></> : <>@ <span className="text-gray-400">now</span></>}
             {result.perUnit != null && (
-              <> &nbsp;(<span className="opacity-80">≈ {result.currency} {fmt2(result.perUnit)} / 1 {result.from}</span>)</>
+              <> &nbsp;(<span className="text-gray-400">≈ {result.currency} {fmt2(result.perUnit)} / 1 {result.from}</span>)</>
             )}
           </p>
 
-          <details className="text-xs">
-            <summary>Raw</summary>
-            <pre className="overflow-auto">{JSON.stringify(result.raw, null, 2)}</pre>
+          <details className="text-xs text-gray-500">
+            <summary className="cursor-pointer font-semibold">Raw</summary>
+            <pre className="overflow-auto bg-slate-900 text-gray-400 p-4 rounded-lg mt-2">
+              {JSON.stringify(result.raw, null, 2)}
+            </pre>
           </details>
         </div>
       )}

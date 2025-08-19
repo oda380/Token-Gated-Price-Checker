@@ -2,10 +2,10 @@
 import React from 'react'
 
 export type PriceFormState = {
-  amount: string            // e.g. "0.1"
-  ticker: string            // e.g. "BTC"
-  inCurrency: 'USD' | 'EUR' // dropdown
-  timestampLocal: string    // "YYYY-MM-DDTHH:mm" (local)
+  amount: string
+  ticker: string
+  inCurrency: 'USD' | 'EUR'
+  timestampLocal: string
 }
 
 type Suggestion = { id: number; symbol: string; name?: string; slug: string; rank?: number }
@@ -30,7 +30,7 @@ export default function PriceForm({
     (k: keyof PriceFormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       let v = e.target.value
-      if (k === 'ticker') v = normalizeTickerInput(v) // live-normalize
+      if (k === 'ticker') v = normalizeTickerInput(v)
       onChange({ [k]: v } as Partial<PriceFormState>)
     }
 
@@ -71,23 +71,22 @@ export default function PriceForm({
   const canSubmit = !!value.ticker.trim() && Number(value.amount) > 0
 
   return (
-    <section className="rounded-2xl border p-4 space-y-4">
-      <h3 className="font-semibold">Price Query</h3>
+    <section className="rounded-2xl border border-slate-700 bg-slate-800 p-6 space-y-6 text-white">
+      <h3 className="font-bold text-xl">Price Query</h3>
 
       {/* Popular chips */}
-      <div className="flex flex-wrap gap-2 -mt-1">
-        <span className="text-xs opacity-60 self-center">Popular:</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-gray-400">Popular:</span>
         {POPULAR.map(sym => (
           <button
             key={sym}
             type="button"
-            className="px-2 py-1 rounded-full border text-xs hover:bg-gray-50"
+            className="px-3 py-1 rounded-full border border-slate-600 bg-slate-700 text-sm hover:bg-slate-600 transition-colors"
             title={`Fill ${sym}${loading ? '' : ' (Shift+Click to price now)'}`}
             onClick={(e) => {
               onChange({ ticker: sym })
               setOpen(false)
               tickerRef.current?.focus()
-              // Shift+Click = also trigger Price Now
               if (e.shiftKey && canSubmit) onPriceNow()
             }}
           >
@@ -96,11 +95,11 @@ export default function PriceForm({
         ))}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2">
         {/* Amount */}
         <Field label="Amount">
           <input
-            className="border rounded p-2 w-full"
+            className="border border-slate-700 rounded-lg p-3 w-full bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500"
             value={value.amount}
             onChange={set('amount')}
             placeholder="0.1"
@@ -113,7 +112,7 @@ export default function PriceForm({
           <div className="relative">
             <input
               ref={tickerRef}
-              className="border rounded p-2 w-full"
+              className="border border-slate-700 rounded-lg p-3 w-full bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500"
               value={value.ticker}
               onChange={(e) => { set('ticker')(e); setOpen(true); setHighlight(0) }}
               onFocus={onTickerFocus}
@@ -129,11 +128,11 @@ export default function PriceForm({
             {open && (fetching || suggestions.length > 0) && (
               <ul
                 id="ticker-suggestions"
-                className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border bg-white shadow"
+                className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-slate-700 bg-slate-800 shadow-xl"
                 role="listbox"
               >
                 {fetching && (
-                  <li className="px-3 py-2 text-sm opacity-60">Searching…</li>
+                  <li className="px-4 py-3 text-sm text-gray-500">Searching…</li>
                 )}
                 {!fetching && suggestions.map((s, i) => (
                   <li
@@ -142,16 +141,16 @@ export default function PriceForm({
                     aria-selected={i === highlight}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => pick(s)}
-                    className={`px-3 py-2 text-sm cursor-pointer ${i === highlight ? 'bg-gray-100' : ''}`}
+                    className={`px-4 py-3 text-sm cursor-pointer hover:bg-slate-700 transition-colors ${i === highlight ? 'bg-slate-700' : ''}`}
                     onMouseEnter={() => setHighlight(i)}
                   >
-                    <span className="font-medium">{s.symbol}</span>
-                    {s.name ? <span className="ml-2 opacity-70">{s.name}</span> : null}
-                    <span className="ml-2 opacity-60">({s.slug})</span>
+                    <span className="font-semibold text-white">{s.symbol}</span>
+                    {s.name ? <span className="ml-2 text-gray-400">{s.name}</span> : null}
+                    <span className="ml-2 text-gray-500">({s.slug})</span>
                   </li>
                 ))}
                 {!fetching && suggestions.length === 0 && value.ticker.trim() && (
-                  <li className="px-3 py-2 text-sm opacity-60">No matches</li>
+                  <li className="px-4 py-3 text-sm text-gray-500">No matches</li>
                 )}
               </ul>
             )}
@@ -162,7 +161,7 @@ export default function PriceForm({
         {/* In */}
         <Field label="In">
           <select
-            className="border rounded p-2 bg-white w-full"
+            className="border border-slate-700 rounded-lg p-3 bg-slate-900 w-full focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
             value={value.inCurrency}
             onChange={set('inCurrency')}
           >
@@ -176,18 +175,17 @@ export default function PriceForm({
           <div className="flex gap-2">
             <input
               type="datetime-local"
-              className="border rounded p-2 flex-1"
+              className="border border-slate-700 rounded-lg p-3 flex-1 bg-slate-900 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               value={value.timestampLocal}
               onChange={set('timestampLocal')}
             />
             <button
               type="button"
               onClick={() => onChange({ timestampLocal: nowLocalForInput() })}
-              className="px-3 rounded border hover:bg-gray-50"
+              className="px-4 rounded-lg border border-slate-700 bg-slate-700 hover:bg-slate-600 transition-colors"
               title="Set to current time"
             >
-              {/* clock icon */}
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
@@ -196,7 +194,7 @@ export default function PriceForm({
               <button
                 type="button"
                 onClick={() => onChange({ timestampLocal: '' })}
-                className="px-3 rounded border hover:bg-gray-50"
+                className="px-4 rounded-lg border border-slate-700 bg-slate-700 hover:bg-slate-600 transition-colors"
                 title="Clear timestamp (use live price)"
               >
                 ✕
@@ -207,7 +205,7 @@ export default function PriceForm({
         </Field>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 pt-2">
         <Btn onClick={onGetPrice} disabled={loading || !canSubmit}>
           Get Price
         </Btn>
@@ -220,7 +218,7 @@ export default function PriceForm({
         >
           Price Now
         </Btn>
-        {loading && <span className="self-center text-sm opacity-70">Loading…</span>}
+        {loading && <span className="self-center text-sm text-gray-400">Loading…</span>}
       </div>
     </section>
   )
@@ -248,7 +246,7 @@ function useTickerSuggestions(query: string) {
       } finally {
         if (!ctrl.signal.aborted) setFetching(false)
       }
-    }, 150) // debounce
+    }, 150)
     return () => { ctrl.abort(); clearTimeout(t) }
   }, [q])
 
@@ -258,18 +256,18 @@ function useTickerSuggestions(query: string) {
 /* ------------------ helpers & atoms ------------------ */
 
 function Btn(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button className="px-3 py-2 rounded bg-black text-white disabled:opacity-50" {...props} />
+  return <button className="px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50" {...props} />
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col">
-      <span className="text-sm opacity-70">{label}</span>
+    <label className="flex flex-col space-y-2">
+      <span className="text-sm font-semibold text-gray-400">{label}</span>
       {children}
     </label>
   )
 }
 function Hint({ children }: { children: React.ReactNode }) {
-  return <span className="text-xs opacity-60 mt-1">{children}</span>
+  return <span className="text-xs text-gray-500 mt-1">{children}</span>
 }
 function nowLocalForInput() {
   const d = new Date()
@@ -277,10 +275,8 @@ function nowLocalForInput() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 function normalizeTickerInput(raw: string) {
-  // normalize for input display — strip $, zero-width, trim, UPPERCASE
   return raw.replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/^\$/, '').trim().toUpperCase()
 }
 function normalizeQuery(raw: string) {
-  // query should be forgiving (don’t force uppercase so name/slug matches feel natural)
   return raw.replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/^\$/, '').trim()
 }

@@ -73,38 +73,44 @@ export default function GateGuard({ children }: { children: React.ReactNode }) {
   // UI states
   if (state.kind === 'loading') {
     return (
-      <div className="max-w-xl mx-auto border rounded-2xl p-6">
-        <p className="text-sm opacity-80">Checking access…</p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
+        <div className="max-w-xl mx-auto rounded-2xl p-6 bg-slate-800 border border-slate-700 shadow-xl text-center">
+          <p className="text-gray-400">Checking access…</p>
+        </div>
       </div>
     )
   }
 
   if (state.kind === 'unauth') {
     return (
-      <div className="max-w-xl mx-auto border rounded-2xl p-6 space-y-3">
-        <h2 className="text-lg font-semibold">Please connect & sign in</h2>
-        <p className="text-sm opacity-80">
-          Use the connect button above to link your wallet and Sign-In with Ethereum.
-        </p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
+        <div className="max-w-xl mx-auto rounded-2xl p-8 space-y-4 bg-slate-800 border border-slate-700 shadow-xl text-center">
+          <h2 className="text-2xl font-bold">Please connect & sign in</h2>
+          <p className="text-gray-400">
+            Use the connect button above to link your wallet and Sign-In with Ethereum.
+          </p>
+        </div>
       </div>
     )
   }
 
   if (state.kind === 'wrongchain') {
     return (
-      <div className="max-w-xl mx-auto border rounded-2xl p-6 space-y-3">
-        <h2 className="text-lg font-semibold">Wrong network</h2>
-        <p className="text-sm opacity-80">
-          This app only works on <b>Base</b>. Please switch networks to continue.
-        </p>
-        <div>
-          <button
-            className="px-3 py-2 rounded bg-black text-white disabled:opacity-50"
-            onClick={() => switchChainAsync({ chainId: base.id }).catch(() => {})}
-            disabled={switching}
-          >
-            {switching ? 'Switching…' : 'Switch to Base'}
-          </button>
+      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
+        <div className="max-w-xl mx-auto rounded-2xl p-8 space-y-4 bg-slate-800 border border-slate-700 shadow-xl text-center">
+          <h2 className="text-2xl font-bold">Wrong network</h2>
+          <p className="text-gray-400">
+            This app only works on <b>Base</b>. Please switch networks to continue.
+          </p>
+          <div className="pt-4">
+            <button
+              className="px-6 py-3 rounded-lg bg-purple-600 text-white font-semibold transition-colors hover:bg-purple-700 disabled:opacity-50"
+              onClick={() => switchChainAsync({ chainId: base.id }).catch(() => {})}
+              disabled={switching}
+            >
+              {switching ? 'Switching…' : 'Switch to Base'}
+            </button>
+          </div>
         </div>
       </div>
     )

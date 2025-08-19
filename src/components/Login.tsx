@@ -1,18 +1,19 @@
 // src/components/Login.tsx
 'use client'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
-import AutoSiwe from './AutoSiwe'
 
 export default function Login() {
   return (
-    <div className="rounded-2xl border p-4">
-      <h3 className="font-semibold mb-3">Connect wallet</h3>
-      <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" />
-      <p className="text-xs opacity-60 mt-2">
-        No browser wallet? Choose <b>WalletConnect</b> and scan the QR with your mobile wallet.
-      </p>
-      {/* Automatically performs SIWE right after a successful connection */}
-      <AutoSiwe />
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-950 text-white">
+      <div className="max-w-md mx-auto rounded-2xl p-8 bg-slate-800 border border-slate-700 shadow-xl space-y-4 text-center">
+        <h3 className="font-bold text-3xl mb-3">Welcome</h3>
+        <p className="text-gray-400">
+          To get started, please connect your wallet holding a valid NFT to access the app.
+        </p>
+        <div className="mt-6">
+          {/* This is where the ConnectButton will go, as it's already in the header */}
+          {/* We don't need to render it here anymore */}
+        </div>
+      </div>
     </div>
-  )
+  );
 }

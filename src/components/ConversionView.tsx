@@ -4,47 +4,49 @@ import React from 'react'
 import { useConvertAmount, type PriceResp } from '@/hooks/usePrices'
 
 type Props = {
-  ticker: string                // e.g., "BTC"
-  amount: string                // e.g., "0.1"
-  currency: 'USD' | 'EUR'       // target fiat
-  at?: string                   // optional "YYYY-MM-DDTHH:mm" (local) for historical
+  ticker: string
+  amount: string
+  currency: 'USD' | 'EUR'
+  at?: string
 }
 
 export default function ConversionView({ ticker, amount, currency, at }: Props) {
   const { data, isLoading, error } = useConvertAmount(ticker, amount, currency, at)
 
+  // Loading state
   if (isLoading) {
     return (
-      <div className="rounded-2xl border p-4 bg-gray-50">
-        <p>Loading…</p>
+      <div className="rounded-2xl border border-slate-700 p-6 bg-slate-800 animate-pulse text-gray-400">
+        <p>Loading conversion data…</p>
       </div>
     )
   }
 
+  // Generic Error state
   if (error) {
     return (
-      <div className="rounded-2xl border p-4 bg-red-50">
-        <p className="text-red-600 text-sm">{String((error as Error).message)}</p>
+      <div className="rounded-2xl border border-red-800 p-6 bg-red-950">
+        <p className="text-red-400 text-sm">{String((error as Error).message)}</p>
       </div>
     )
   }
 
   if (!data) return null
 
-  // Ambiguous / error path with suggestions from /api/price (409)
+  // Ambiguous/Suggestion state
   if ('error' in data) {
     return (
-      <div className="rounded-2xl border p-4 bg-amber-50 space-y-2">
-        <p className="text-amber-700 text-sm">{data.error}</p>
+      <div className="rounded-2xl border border-amber-800 p-6 bg-amber-950 space-y-3">
+        <p className="text-amber-400 text-sm">{data.error}</p>
         {data.suggestions?.length ? (
           <div className="text-sm">
-            <p className="font-medium">Did you mean:</p>
-            <ul className="list-disc ml-5">
+            <p className="font-medium text-amber-300">Did you mean:</p>
+            <ul className="list-disc ml-5 text-gray-300">
               {data.suggestions.map(s => (
                 <li key={s.id}>
-                  {s.symbol}
-                  {s.name ? <span className="opacity-70"> — {s.name}</span> : null}
-                  <span className="opacity-60"> ({s.slug})</span>
+                  <span className="font-semibold">{s.symbol}</span>
+                  {s.name ? <span className="text-gray-400"> — {s.name}</span> : null}
+                  <span className="text-gray-500"> ({s.slug})</span>
                 </li>
               ))}
             </ul>
@@ -54,25 +56,27 @@ export default function ConversionView({ ticker, amount, currency, at }: Props) 
     )
   }
 
-  // Success
+  // Success state
   const sym = data.symbol ?? ticker.toUpperCase()
   const total = data.total
   const perUnit = data.pricePerUnit
   const timeLabel = data.at ?? data.lastUpdated ?? 'now'
 
   return (
-    <div className="rounded-2xl border p-4 space-y-2 bg-gray-50">
-      <h4 className="font-semibold">Conversion</h4>
-      <p className="text-base">
-        <strong>{data.amount} {sym}</strong>
-        {' '}= <strong>{data.convert} {fmt2(total)}</strong>
-        {' '}@ <span className="opacity-80">{timeLabel}{data.at ? ' UTC' : ''}</span>
+    <div className="rounded-2xl border border-slate-700 p-6 space-y-3 bg-slate-800">
+      <h4 className="font-bold text-white text-lg">Conversion</h4>
+      <p className="text-base text-gray-300">
+        <strong className="text-purple-400">{data.amount} {sym}</strong>
+        {' '}= <strong className="text-white">{data.convert} {fmt2(total)}</strong>
+        {' '}@ <span className="text-gray-400">{timeLabel}{data.at ? ' UTC' : ''}</span>
       </p>
-      <p className="text-sm opacity-80">≈ {data.convert} {fmt2(perUnit)} / 1 {sym}</p>
+      <p className="text-sm text-gray-400">≈ {data.convert} {fmt2(perUnit)} / 1 {sym}</p>
 
-      <details className="text-xs">
-        <summary>Raw</summary>
-        <pre className="overflow-auto">{JSON.stringify(data, null, 2)}</pre>
+      <details className="text-xs text-gray-500">
+        <summary className="cursor-pointer font-semibold">Raw</summary>
+        <pre className="overflow-auto bg-slate-900 text-gray-400 p-4 rounded-lg mt-2">
+          {JSON.stringify(data, null, 2)}
+        </pre>
       </details>
     </div>
   )
