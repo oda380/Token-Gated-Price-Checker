@@ -95,7 +95,7 @@ export default function PriceForm({
         ))}
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
         {/* Amount */}
         <Field label="Amount">
           <input
@@ -172,10 +172,10 @@ export default function PriceForm({
 
         {/* UTC Timestamp */}
         <Field label="UTC Timestamp">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <input
               type="datetime-local"
-              className="border border-slate-700 rounded-lg p-3 flex-1 bg-slate-900 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="border border-slate-700 rounded-lg p-3 flex-1 min-w-[170px] bg-slate-900 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               value={value.timestampLocal}
               onChange={set('timestampLocal')}
             />
