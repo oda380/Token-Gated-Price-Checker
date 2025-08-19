@@ -42,3 +42,7 @@ AccessCardContract/*
 next-env.d.ts
 .history/
 src/.history/*
+csv2json-validated.mjs
+csv2json.js
+invalid_rows.txt
+recipients.csv
