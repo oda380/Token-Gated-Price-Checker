@@ -1,4 +1,4 @@
-// src/components/AutoSiwe.tsx
+
 'use client'
 
 import * as React from 'react'

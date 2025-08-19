@@ -1,4 +1,4 @@
-// src/app/layout.tsx
+
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import ContextProvider from '@/context/provider'

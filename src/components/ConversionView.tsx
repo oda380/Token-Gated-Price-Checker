@@ -13,7 +13,7 @@ type Props = {
 export default function ConversionView({ ticker, amount, currency, at }: Props) {
   const { data, isLoading, error } = useConvertAmount(ticker, amount, currency, at)
 
-  // Loading state
+
   if (isLoading) {
     return (
       <div className="rounded-2xl border border-slate-700 p-6 bg-slate-800 animate-pulse text-gray-400">
@@ -22,7 +22,7 @@ export default function ConversionView({ ticker, amount, currency, at }: Props) 
     )
   }
 
-  // Generic Error state
+ 
   if (error) {
     return (
       <div className="rounded-2xl border border-red-800 p-6 bg-red-950">
@@ -33,7 +33,7 @@ export default function ConversionView({ ticker, amount, currency, at }: Props) 
 
   if (!data) return null
 
-  // Ambiguous/Suggestion state
+  
   if ('error' in data) {
     return (
       <div className="rounded-2xl border border-amber-800 p-6 bg-amber-950 space-y-3">
@@ -56,7 +56,7 @@ export default function ConversionView({ ticker, amount, currency, at }: Props) 
     )
   }
 
-  // Success state
+  
   const sym = data.symbol ?? ticker.toUpperCase()
   const total = data.total
   const perUnit = data.pricePerUnit

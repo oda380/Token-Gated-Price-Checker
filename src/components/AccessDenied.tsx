@@ -13,7 +13,7 @@ export default function AccessDenied({ reason }: { reason: 'NO_NFT' | 'BLACKLIST
         )}
         {reason === 'BLACKLISTED_TOKEN' && (
           <p className="text-gray-400">
-            Your wallet holds a token ID that’s blocked for this app. Please switch wallets or contact support.
+            Your wallet holds a token ID that’s deactivated for this app. Please switch wallets or contact support.
           </p>
         )}
         {reason !== 'NO_NFT' && reason !== 'BLACKLISTED_TOKEN' && (

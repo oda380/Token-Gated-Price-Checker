@@ -87,7 +87,7 @@ export default function GateGuard({ children }: { children: React.ReactNode }) {
         <div className="max-w-xl mx-auto rounded-2xl p-8 space-y-4 bg-slate-800 border border-slate-700 shadow-xl text-center">
           <h2 className="text-2xl font-bold">Please connect & sign in</h2>
           <p className="text-gray-400">
-            Use the connect button above to link your wallet and Sign-In with Ethereum.
+            Use the connect button above and Sign-In with Ethereum.
           </p>
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function GateGuard({ children }: { children: React.ReactNode }) {
         <div className="max-w-xl mx-auto rounded-2xl p-8 space-y-4 bg-slate-800 border border-slate-700 shadow-xl text-center">
           <h2 className="text-2xl font-bold">Wrong network</h2>
           <p className="text-gray-400">
-            This app only works on <b>Base</b>. Please switch networks to continue.
+            The active network should be <b>Base</b>. Please switch networks to continue.
           </p>
           <div className="pt-4">
             <button

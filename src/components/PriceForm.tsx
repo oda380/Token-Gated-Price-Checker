@@ -201,7 +201,7 @@ export default function PriceForm({
               </button>
             )}
           </div>
-          <Hint>Local picker is converted to UTC automatically.</Hint>
+          <Hint>The app uses UTC/GMT time zone.</Hint>
         </Field>
       </div>
 

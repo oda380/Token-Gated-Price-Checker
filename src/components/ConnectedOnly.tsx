@@ -13,7 +13,7 @@ export default function ConnectedOnly({ children }: { children: React.ReactNode 
             Connect & Sign In
           </h2>
           <p className="text-gray-400">
-            Use the button above to connect your wallet with an access NFT and sign in.
+            Connect your wallet with an access NFT and sign in.
           </p>
         </div>
       </div>

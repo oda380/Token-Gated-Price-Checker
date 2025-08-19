@@ -45,9 +45,8 @@ function LatestRow({ ticker, currency }: { ticker: string; currency: 'USD'|'EUR'
     return row(ticker, currency, data.error + extra, '—', 'warning')
   }
 
-  // NOTE: You'll need to fetch and compare previous prices to style based on price change.
-  // This example assumes no change for now.
-  const priceColor = 'text-white' // You could make this dynamic
+
+  const priceColor = 'text-white' 
 
   return (
     <tr className="border-t border-slate-700 hover:bg-slate-700 transition-colors">

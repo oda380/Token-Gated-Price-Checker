@@ -7,7 +7,7 @@ export default function Login() {
       <div className="max-w-md mx-auto rounded-2xl p-8 bg-slate-800 border border-slate-700 shadow-xl space-y-4 text-center">
         <h3 className="font-bold text-3xl mb-3">Welcome</h3>
         <p className="text-gray-400">
-          To get started, please connect your wallet holding a valid NFT to access the app.
+          To get started, please connect your wallet with a valid NFT to access the app.
         </p>
         <div className="mt-6">
           {/* This is where the ConnectButton will go, as it's already in the header */}
