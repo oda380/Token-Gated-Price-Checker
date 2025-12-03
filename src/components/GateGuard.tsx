@@ -73,9 +73,9 @@ export default function GateGuard({ children }: { children: React.ReactNode }) {
   // UI states
   if (state.kind === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
-        <div className="max-w-xl mx-auto rounded-2xl p-6 bg-slate-800 border border-slate-700 shadow-xl text-center">
-          <p className="text-gray-400">Checking access…</p>
+      <div className="flex min-h-[50vh] items-center justify-center text-white">
+        <div className="neo-card max-w-xl mx-auto text-center">
+          <p className="text-[#CCFF00] font-mono animate-pulse uppercase tracking-widest">Checking access...</p>
         </div>
       </div>
     )
@@ -83,12 +83,14 @@ export default function GateGuard({ children }: { children: React.ReactNode }) {
 
   if (state.kind === 'unauth') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
-        <div className="max-w-xl mx-auto rounded-2xl p-8 space-y-4 bg-slate-800 border border-slate-700 shadow-xl text-center">
-          <h2 className="text-2xl font-bold">Please connect & sign in</h2>
-          <p className="text-gray-400">
-            Use the connect button above and Sign-In with Ethereum.
+      <div className="flex min-h-[50vh] items-center justify-center text-white">
+        <div className="neo-card max-w-xl mx-auto space-y-4 text-center">
+          <h2 className="text-2xl font-bold uppercase tracking-tighter">Authentication Required</h2>
+          <p className="text-gray-300 font-mono text-sm">
+            PLEASE SIGN THE MESSAGE IN YOUR WALLET TO VERIFY OWNERSHIP.
           </p>
+          <div className="w-full h-1 bg-gray-800 my-4" />
+          <p className="text-xs text-gray-500 uppercase">Waiting for signature...</p>
         </div>
       </div>
     )
@@ -96,19 +98,19 @@ export default function GateGuard({ children }: { children: React.ReactNode }) {
 
   if (state.kind === 'wrongchain') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
-        <div className="max-w-xl mx-auto rounded-2xl p-8 space-y-4 bg-slate-800 border border-slate-700 shadow-xl text-center">
-          <h2 className="text-2xl font-bold">Wrong network</h2>
-          <p className="text-gray-400">
-            The active network should be <b>Base</b>. Please switch networks to continue.
+      <div className="flex min-h-[50vh] items-center justify-center text-white">
+        <div className="neo-card max-w-xl mx-auto space-y-4 text-center border-red-500 shadow-[8px_8px_0px_0px_red]">
+          <h2 className="text-2xl font-bold uppercase tracking-tighter text-red-500">Wrong Network</h2>
+          <p className="text-gray-300 font-mono text-sm">
+            ACCESS RESTRICTED TO <span className="text-white font-bold">BASE</span> NETWORK.
           </p>
           <div className="pt-4">
             <button
-              className="px-6 py-3 rounded-lg bg-purple-600 text-white font-semibold transition-colors hover:bg-purple-700 disabled:opacity-50"
-              onClick={() => switchChainAsync({ chainId: base.id }).catch(() => {})}
+              className="neo-btn w-full"
+              onClick={() => switchChainAsync({ chainId: base.id }).catch(() => { })}
               disabled={switching}
             >
-              {switching ? 'Switching…' : 'Switch to Base'}
+              {switching ? 'SWITCHING...' : 'SWITCH TO BASE'}
             </button>
           </div>
         </div>

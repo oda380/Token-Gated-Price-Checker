@@ -1,10 +1,10 @@
-// /app/api/price/route.ts
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 import { resolveToId, normalizeInput } from '@/lib/cgIndex'
+import { getCached, setCached } from '@/lib/cache'
 
 type Convert = 'USD' | 'EUR'
 const CG = 'https://api.coingecko.com/api/v3'
@@ -14,8 +14,6 @@ const headers = () => {
   if (process.env.CG_API_KEY) h['x-cg-demo-api-key'] = process.env.CG_API_KEY
   return h
 }
-
-
 
 // nearest in array of [ms, price]
 function nearestPoint(points: [number, number][], targetMs: number) {
@@ -31,8 +29,8 @@ function nearestPoint(points: [number, number][], targetMs: number) {
 
 // helper to extract message
 function errMsg(e: unknown) {
-    return e instanceof Error ? e.message : String(e);
-  }
+  return e instanceof Error ? e.message : String(e);
+}
 
 export async function POST(req: Request) {
   try {
@@ -60,8 +58,14 @@ export async function POST(req: Request) {
     const name = resolved.match.name
 
     if (timestampIso) {
+      // Historical data - usually not cached as heavily or maybe cached by specific timestamp query
+      // For now, let's cache historical queries by exact params for 60s too
       const t = Date.parse(timestampIso)
       if (Number.isNaN(t)) return NextResponse.json({ error: 'Invalid timestamp ISO' }, { status: 400 })
+
+      const cacheKey = `hist:${id}:${convert}:${t}`
+      const cached = getCached<any>(cacheKey)
+      if (cached) return NextResponse.json(cached)
 
       const targetSec = Math.floor(t / 1000)
       const from = targetSec - 2 * 60 * 60
@@ -79,8 +83,8 @@ export async function POST(req: Request) {
       }
       const json = await res.json()
       const prices = Array.isArray((json as { prices?: unknown }).prices)
-  ? ((json as { prices: [number, number][] }).prices)
-  : [];
+        ? ((json as { prices: [number, number][] }).prices)
+        : [];
       const pick = nearestPoint(prices, t)
       if (!pick) {
         return NextResponse.json({
@@ -91,7 +95,7 @@ export async function POST(req: Request) {
 
       const pricePerUnit = pick[1]
       const total = amount * pricePerUnit
-      return NextResponse.json({
+      const result = {
         ok: true,
         id, symbol, name,
         convert,
@@ -100,8 +104,24 @@ export async function POST(req: Request) {
         total,
         lastUpdated: new Date(pick[0]).toISOString(),
         at: timestampIso
-      })
+      }
+
+      setCached(cacheKey, result, 60) // Cache for 60s
+      return NextResponse.json(result)
+
     } else {
+      // Live price - highly cacheable
+      const cacheKey = `live:${id}:${convert}`
+      const cached = getCached<any>(cacheKey)
+      if (cached) {
+        // Recalculate total based on current amount
+        return NextResponse.json({
+          ...cached,
+          amount,
+          total: amount * cached.pricePerUnit
+        })
+      }
+
       const url = new URL(`${CG}/simple/price`)
       url.searchParams.set('ids', id)
       url.searchParams.set('vs_currencies', convert.toLowerCase())
@@ -116,19 +136,24 @@ export async function POST(req: Request) {
       const pricePerUnit = node?.[convert.toLowerCase()] as number | undefined
       if (typeof pricePerUnit !== 'number') return NextResponse.json({ error: `No ${convert} quote for ${id}` }, { status: 404 })
 
-      const total = amount * pricePerUnit
-      return NextResponse.json({
+      const resultBase = {
         ok: true,
         id, symbol, name,
         convert,
-        amount,
         pricePerUnit,
-        total,
         lastUpdated: new Date().toISOString(),
         at: undefined
+      }
+
+      setCached(cacheKey, resultBase, 60) // Cache for 60s
+
+      return NextResponse.json({
+        ...resultBase,
+        amount,
+        total: amount * pricePerUnit
       })
     }
-    } catch (e: unknown) {
+  } catch (e: unknown) {
     return NextResponse.json({ error: errMsg(e) || 'Server error' }, { status: 500 });
   }
 }

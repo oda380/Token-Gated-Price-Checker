@@ -1,3 +1,6 @@
+// Force dynamic rendering for this route (generates nonce)
+export const dynamic = 'force-dynamic'
+
 import { generateNonce } from 'siwe'
 
 export async function GET() {

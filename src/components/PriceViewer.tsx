@@ -1,19 +1,18 @@
-//PriceViewer.tsx
 'use client'
-import React from 'react'
+import { useState } from 'react'
 import PriceForm, { type PriceFormState } from './PriceForm'
 
 export default function PriceViewer() {
-  const [form, setForm] = React.useState<PriceFormState>({
+  const [form, setForm] = useState<PriceFormState>({
     amount: '0.1',
     ticker: '',
     inCurrency: 'USD',
     timestampLocal: ''
   })
 
-  const [loading, setLoading] = React.useState(false)
-  const [error, setError] = React.useState<string | null>(null)
-  const [result, setResult] = React.useState<null | {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useState<null | {
     from: string
     amount: number
     currency: 'USD' | 'EUR'
@@ -98,8 +97,8 @@ export default function PriceViewer() {
         perUnit,
         raw: json
       })
-    }  catch (e: unknown) {
-        setError(e instanceof Error ? e.message : String(e));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false)
     }
@@ -142,8 +141,8 @@ export default function PriceViewer() {
       )}
 
       {result && (result.value != null) && (
-        <div className="rounded-2xl border border-slate-700 p-6 space-y-4 bg-slate-800 text-white">
-          <h4 className="font-bold text-xl">Result</h4>
+        <div className="neo-card space-y-4 text-white">
+          <h4 className="font-bold text-2xl uppercase tracking-tighter border-b-2 border-white pb-2">Result</h4>
           <p className="text-base text-gray-300">
             <strong className="text-purple-400">{result.amount} {result.from}</strong>
             {' '}= <strong className="text-white">{result.currency} {fmt2(result.value)}</strong>

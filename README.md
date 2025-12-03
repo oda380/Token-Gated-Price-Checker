@@ -1,142 +1,87 @@
+# GATED_PRICES (Terminal V1)
 
-# 🔐 Token-Gated Crypto Price Viewer
+**Institutional Grade. Open Access. Real-Time.**
 
-A **Next.js 14** + **Sign-In With Ethereum (SIWE)** app that requires holding a valid **ERC-721 NFT (on Base chain)** to access a dashboard for **live & historical crypto price lookups** via CoinMarketCap API.
+A Neo-Brutalist crypto price checker built on **Next.js 16**, **Tailwind v4**, and **Wagmi**. Designed for speed, aesthetics, and performance.
 
----
+![App Screenshot](https://via.placeholder.com/800x400/000000/CCFF00?text=GATED_PRICES_PREVIEW)
 
-## 🚀 Features
+## ⚡ Features
 
-- **Wallet-based login with SIWE**
-  - Users connect their Ethereum wallet and sign a SIWE message
-  - Auth handled by **NextAuth (JWT strategy)**
-
-- **NFT Gated Dashboard**
-  - Only wallets holding a valid ERC-721 NFT (Base chain) can access
-  - Unauthorized wallets see an access denied message
-
-- **Crypto Price Viewer**
-  - Search prices by:
-    - Amount (e.g. `0.1`)
-    - Ticker (e.g. `BTC`, `ETH`, `SOL`)
-    - Currency (`USD` or `EUR`)
-    - Timestamp (UTC) or "Price Now"
-  - Returns clean result:
-    ```
-    0.1 BTC = USD 6500.00 @ 2024-01-01 UTC 
-    (≈ USD 65,000 / 1 BTC)
-    ```
-  - Expandable raw JSON from CMC API
-
----
+*   **Neo-Brutalist Design:** High-contrast "Dark Degen" aesthetic with neon accents (`#CCFF00`, `#FF00FF`), hard shadows, and raw borders.
+*   **Real-Time Prices:** Fetches live data from the **CoinGecko API**.
+*   **Smart Caching:** Server-side in-memory caching (60s TTL) protects API rate limits while serving thousands of users.
+*   **Motion Effects:** Interactive marquee ticker and micro-animations.
+*   **Wallet Connection:** Integrated **RainbowKit** + **Wagmi** for wallet connectivity (Base Network).
+*   **Token Gating (Optional):** Built-in architecture to restrict features based on NFT ownership (currently relaxed for public access).
+*   **Secure Auth:** SIWE (Sign-In with Ethereum) via **NextAuth.js**.
 
 ## 🛠️ Tech Stack
 
-- **Frontend**
-  - [Next.js 14](https://nextjs.org/) (App Router)
-  - [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-  - [TailwindCSS](https://tailwindcss.com/) for styling
+*   **Framework:** Next.js 16 (App Router)
+*   **Styling:** Tailwind CSS v4.1
+*   **Web3:** Wagmi, Viem, RainbowKit
+*   **Auth:** NextAuth.js, SIWE
+*   **Data:** CoinGecko API
+*   **Font:** Space Grotesk
 
-- **Web3**
-  - [wagmi](https://wagmi.sh/) hooks
-  - [RainbowKit / ReOwn AppKit](https://reown.com/) for wallet UX
-  - [SIWE](https://login.xyz/) for authentication
+## 🚀 Getting Started
 
-- **Authentication**
-  - [NextAuth](https://next-auth.js.org/) with **Credentials Provider**
-  - SIWE signature verification
-  - JWT session storing wallet `address` + `chainId`
-
-- **Backend**
-  - Next.js API routes
-  - [CoinMarketCap API](https://coinmarketcap.com/api/) for prices
-  - Protected routes (`/api/gate`, `/api/prices/convert`)
-
----
-
-## 📂 Project Structure
-
-````
-
-src/
-├─ app/
-│   ├─ api/
-│   │   ├─ siwe/         # SIWE auth routes (nonce, callback, etc.)
-│   │   ├─ gate/         # NFT gating check
-│   │   └─ prices/       # CMC price lookup endpoints
-│   ├─ layout.tsx        # App layout wrapper
-│   └─ page.tsx          # Main dashboard
-│
-├─ components/
-│   ├─ Login.tsx         # SIWE connect/sign-in/out button
-│   ├─ PriceForm.tsx     # Form inputs
-│   └─ PriceViewer.tsx   # Price fetch + display
-│
-├─ config/
-│   └─ wagmi.ts          # Wagmi & ReOwn config
-│
-└─ provider.tsx          # Wagmi, QueryClient, NextAuth session providers
-
-````
-
----
-
-## ⚙️ Setup
-
-1. **Clone repo & install**
-   ```bash
-   git clone https://github.com/your/repo.git
-   cd repo
-   npm install
-````
-
-2. **Create `.env.local`**
-
-   ```ini
-   NEXTAUTH_SECRET=your_random_secret_here
-   NEXTAUTH_URL=http://localhost:3000
-   NEXT_PUBLIC_PROJECT_ID=your_reown_or_walletconnect_id
-   CMC_API_KEY=your_coinmarketcap_api_key
-   ```
-
-   * Generate `NEXTAUTH_SECRET`:
-
-     ```bash
-     openssl rand -base64 32
-     ```
-
-3. **Run dev**
-
-   ```bash
-   npm run dev
-   ```
-
-4. **Open app** → [http://localhost:3000](http://localhost:3000)
-
----
-
-## 🔒 NFT Gating
-
-* The API route `/api/gate` checks if the authenticated wallet holds a specific NFT on **Base mainnet**
-* Replace placeholder logic with your actual contract address & ABI
-
----
-
-## 🧭 Roadmap
-
-* ✅ Wallet login via SIWE
-* ✅ NFT-based access control
-* ✅ Live & historical price lookup
-* ⬜ Improve UI polish (calendar/time picker, error states)
-* ⬜ Deploy to Vercel or another host
-* ⬜ Finalize NFT gating (contract check)
-
----
-
-## 📜 License
-
-MIT
-
+### 1. Clone & Install
+```bash
+git clone https://github.com/yourusername/token-gated-price-checker.git
+cd token-gated-price-checker
+npm install
 ```
 
+### 2. Environment Setup
+Create a `.env.local` file in the root directory:
+```bash
+cp env.local.example .env.local
+```
+
+Fill in your keys:
+```env
+# App
+NEXT_PUBLIC_APP_NAME="GATED_PRICES"
+NEXT_PUBLIC_PROJECT_ID="your_walletconnect_id"
+
+# Auth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your_generated_secret"
+
+# Blockchain
+NEXT_PUBLIC_ALCHEMY_HTTP_URL="https://base-mainnet.g.alchemy.com/v2/your_key"
+
+# CoinGecko (Optional for free tier)
+CG_API_KEY="your_coingecko_key"
+```
+
+### 3. Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+## 🛡️ Architecture
+
+### Caching Strategy
+To prevent hitting CoinGecko's rate limits (30 calls/min), we implement a **server-side cache**:
+*   **TTL:** 60 seconds.
+*   **Mechanism:** In-memory `Map` in `src/lib/cache.ts`.
+*   **Benefit:** Multiple users requesting `BTC` within the same minute trigger only **one** external API call.
+
+### Access Control
+*   **Public:** The main `PriceViewer` is open to all users.
+*   **Gated (Optional):** The `GateGuard` component can wrap any section to require a specific NFT on Base.
+
+## 🎨 Design System
+
+*   **Font:** Space Grotesk
+*   **Primary Color:** Neon Lime (`#CCFF00`)
+*   **Secondary Color:** Magenta (`#FF00FF`)
+*   **Background:** Deep Black (`#000000`) with subtle grid.
+
 ---
+
+**GATED_PRICES © 2025**

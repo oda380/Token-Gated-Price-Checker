@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import { useState, useEffect, useRef, type ChangeEvent, type KeyboardEvent, type ButtonHTMLAttributes, type ReactNode } from 'react'
 
 export type PriceFormState = {
   amount: string
@@ -10,7 +10,7 @@ export type PriceFormState = {
 
 type Suggestion = { id: number; symbol: string; name?: string; slug: string; rank?: number }
 
-const POPULAR = ['BTC','ETH','USDT','SOL','XRP','ADA','DOGE']
+const POPULAR = ['BTC', 'ETH', 'USDT', 'SOL', 'XRP', 'ADA', 'DOGE']
 
 export default function PriceForm({
   value, onChange, onGetPrice, onPriceNow, loading
@@ -21,18 +21,18 @@ export default function PriceForm({
   onPriceNow: () => void
   loading?: boolean
 }) {
-  const [open, setOpen] = React.useState(false)
-  const [highlight, setHighlight] = React.useState(0)
+  const [open, setOpen] = useState(false)
+  const [highlight, setHighlight] = useState(0)
   const { suggestions, fetching } = useTickerSuggestions(value.ticker)
-  const tickerRef = React.useRef<HTMLInputElement>(null)
+  const tickerRef = useRef<HTMLInputElement>(null)
 
   const set =
     (k: keyof PriceFormState) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      let v = e.target.value
-      if (k === 'ticker') v = normalizeTickerInput(v)
-      onChange({ [k]: v } as Partial<PriceFormState>)
-    }
+      (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        let v = e.target.value
+        if (k === 'ticker') v = normalizeTickerInput(v)
+        onChange({ [k]: v } as Partial<PriceFormState>)
+      }
 
   const pick = (s: Suggestion) => {
     onChange({ ticker: s.symbol.toUpperCase() })
@@ -45,7 +45,7 @@ export default function PriceForm({
   }
   const onTickerBlur = () => setTimeout(() => setOpen(false), 120)
 
-  const onTickerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onTickerKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (!open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
       setOpen(true)
       return
@@ -71,17 +71,17 @@ export default function PriceForm({
   const canSubmit = !!value.ticker.trim() && Number(value.amount) > 0
 
   return (
-    <section className="rounded-2xl border border-slate-700 bg-slate-800 p-6 space-y-6 text-white">
-      <h3 className="font-bold text-xl">Price Query</h3>
+    <section className="neo-card space-y-8 text-white">
+      <h3 className="font-bold text-3xl uppercase tracking-tighter border-b-2 border-white pb-4">Price Query</h3>
 
       {/* Popular chips */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-gray-400">Popular:</span>
+        <span className="text-sm font-bold uppercase text-gray-400">Popular:</span>
         {POPULAR.map(sym => (
           <button
             key={sym}
             type="button"
-            className="px-3 py-1 rounded-full border border-slate-600 bg-slate-700 text-sm hover:bg-slate-600 transition-colors"
+            className="neo-tag"
             title={`Fill ${sym}${loading ? '' : ' (Shift+Click to price now)'}`}
             onClick={(e) => {
               onChange({ ticker: sym })
@@ -97,9 +97,9 @@ export default function PriceForm({
 
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
         {/* Amount */}
-        <Field label="Amount">
+        <Field label="AMOUNT">
           <input
-            className="border border-slate-700 rounded-lg p-3 w-full bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500"
+            className="neo-input"
             value={value.amount}
             onChange={set('amount')}
             placeholder="0.1"
@@ -108,17 +108,17 @@ export default function PriceForm({
         </Field>
 
         {/* Ticker + Autocomplete */}
-        <Field label="Ticker">
+        <Field label="TICKER">
           <div className="relative">
             <input
               ref={tickerRef}
-              className="border border-slate-700 rounded-lg p-3 w-full bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500"
+              className="neo-input"
               value={value.ticker}
               onChange={(e) => { set('ticker')(e); setOpen(true); setHighlight(0) }}
               onFocus={onTickerFocus}
               onBlur={onTickerBlur}
               onKeyDown={onTickerKeyDown}
-              placeholder="BTC or ethereum"
+              placeholder="BTC"
               autoCapitalize="characters"
               spellCheck={false}
               aria-autocomplete="list"
@@ -128,11 +128,11 @@ export default function PriceForm({
             {open && (fetching || suggestions.length > 0) && (
               <ul
                 id="ticker-suggestions"
-                className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-slate-700 bg-slate-800 shadow-xl"
+                className="absolute z-20 mt-1 max-h-56 w-full overflow-auto border-2 border-white bg-black shadow-[4px_4px_0px_0px_white]"
                 role="listbox"
               >
                 {fetching && (
-                  <li className="px-4 py-3 text-sm text-gray-500">Searching…</li>
+                  <li className="px-4 py-3 text-sm text-gray-500 font-mono">SEARCHING...</li>
                 )}
                 {!fetching && suggestions.map((s, i) => (
                   <li
@@ -141,27 +141,26 @@ export default function PriceForm({
                     aria-selected={i === highlight}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => pick(s)}
-                    className={`px-4 py-3 text-sm cursor-pointer hover:bg-slate-700 transition-colors ${i === highlight ? 'bg-slate-700' : ''}`}
+                    className={`px-4 py-3 text-sm cursor-pointer border-b border-gray-800 last:border-0 ${i === highlight ? 'bg-[#CCFF00] text-black font-bold' : 'text-white hover:bg-gray-900'}`}
                     onMouseEnter={() => setHighlight(i)}
                   >
-                    <span className="font-semibold text-white">{s.symbol}</span>
-                    {s.name ? <span className="ml-2 text-gray-400">{s.name}</span> : null}
-                    <span className="ml-2 text-gray-500">({s.slug})</span>
+                    <span className="uppercase">{s.symbol}</span>
+                    {s.name ? <span className="ml-2 opacity-70">{s.name}</span> : null}
                   </li>
                 ))}
                 {!fetching && suggestions.length === 0 && value.ticker.trim() && (
-                  <li className="px-4 py-3 text-sm text-gray-500">No matches</li>
+                  <li className="px-4 py-3 text-sm text-gray-500 font-mono">NO MATCHES</li>
                 )}
               </ul>
             )}
           </div>
-          <Hint>Enter a <b>symbol</b> (BTC, ETH) or <b>name/slug</b> (ethereum). We’ll resolve it.</Hint>
+          <Hint>ENTER SYMBOL (BTC) OR NAME (ETHEREUM)</Hint>
         </Field>
 
         {/* In */}
-        <Field label="In">
+        <Field label="CURRENCY">
           <select
-            className="border border-slate-700 rounded-lg p-3 bg-slate-900 w-full focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+            className="neo-input appearance-none"
             value={value.inCurrency}
             onChange={set('inCurrency')}
           >
@@ -171,54 +170,51 @@ export default function PriceForm({
         </Field>
 
         {/* UTC Timestamp */}
-        <Field label="UTC Timestamp">
+        <Field label="TIMESTAMP (UTC)">
           <div className="flex flex-wrap gap-2">
             <input
               type="datetime-local"
-              className="border border-slate-700 rounded-lg p-3 flex-1 min-w-[170px] bg-slate-900 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="neo-input flex-1 min-w-[170px]"
               value={value.timestampLocal}
               onChange={set('timestampLocal')}
             />
             <button
               type="button"
               onClick={() => onChange({ timestampLocal: nowLocalForInput() })}
-              className="px-4 rounded-lg border border-slate-700 bg-slate-700 hover:bg-slate-600 transition-colors"
+              className="px-4 border-2 border-white bg-black hover:bg-white hover:text-black transition-colors"
               title="Set to current time"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
+              NOW
             </button>
             {value.timestampLocal && (
               <button
                 type="button"
                 onClick={() => onChange({ timestampLocal: '' })}
-                className="px-4 rounded-lg border border-slate-700 bg-slate-700 hover:bg-slate-600 transition-colors"
-                title="Clear timestamp (use live price)"
+                className="px-4 border-2 border-white bg-black hover:bg-red-500 hover:border-red-500 hover:text-white transition-colors"
+                title="Clear timestamp"
               >
                 ✕
               </button>
             )}
           </div>
-          <Hint>The app uses UTC/GMT time zone.</Hint>
         </Field>
       </div>
 
-      <div className="flex flex-wrap gap-3 pt-2">
-        <Btn onClick={onGetPrice} disabled={loading || !canSubmit}>
-          Get Price
-        </Btn>
-        <Btn
+      <div className="flex flex-wrap gap-4 pt-4 border-t-2 border-white">
+        <button className="neo-btn" onClick={onGetPrice} disabled={loading || !canSubmit}>
+          GET PRICE
+        </button>
+        <button
+          className="neo-btn"
           onClick={() => {
             if (value.timestampLocal) onChange({ timestampLocal: '' })
             onPriceNow()
           }}
           disabled={loading || !canSubmit}
         >
-          Price Now
-        </Btn>
-        {loading && <span className="self-center text-sm text-gray-400">Loading…</span>}
+          PRICE NOW
+        </button>
+        {loading && <span className="self-center text-sm font-mono text-[#CCFF00] animate-pulse">LOADING_DATA...</span>}
       </div>
     </section>
   )
@@ -228,10 +224,10 @@ export default function PriceForm({
 
 function useTickerSuggestions(query: string) {
   const q = normalizeQuery(query)
-  const [suggestions, setSuggestions] = React.useState<Suggestion[]>([])
-  const [fetching, setFetching] = React.useState(false)
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [fetching, setFetching] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!q) { setSuggestions([]); return }
     const ctrl = new AbortController()
     setFetching(true)
@@ -255,19 +251,16 @@ function useTickerSuggestions(query: string) {
 
 /* ------------------ helpers & atoms ------------------ */
 
-function Btn(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button className="px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50" {...props} />
-}
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="flex flex-col space-y-2">
-      <span className="text-sm font-semibold text-gray-400">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-widest text-[#CCFF00]">{label}</span>
       {children}
     </label>
   )
 }
-function Hint({ children }: { children: React.ReactNode }) {
-  return <span className="text-xs text-gray-500 mt-1">{children}</span>
+function Hint({ children }: { children: ReactNode }) {
+  return <span className="text-[10px] uppercase tracking-wider text-gray-500 mt-1 font-mono">{children}</span>
 }
 function nowLocalForInput() {
   const d = new Date()

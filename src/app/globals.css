@@ -1,2 +1,89 @@
-
 @import "tailwindcss";
+
+@theme {
+  --color-bg-deep: #000000;
+  --color-brand-primary: #CCFF00;
+  --color-brand-secondary: #FF00FF;
+  --color-text-main: #FFFFFF;
+  --color-border: #FFFFFF;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg-deep);
+    color: var(--color-text-main);
+    background-image:
+      linear-gradient(to right, #111 1px, transparent 1px),
+      linear-gradient(to bottom, #111 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+@layer components {
+  .neo-card {
+    @apply border-2 border-white bg-black p-6 relative;
+    box-shadow: 8px 8px 0px 0px var(--color-brand-primary);
+  }
+
+  .neo-input {
+    @apply w-full bg-black text-white border-2 border-white p-3 rounded-none placeholder-gray-500 focus:outline-none transition-all;
+
+    &:focus {
+      box-shadow: 4px 4px 0px 0px var(--color-brand-secondary);
+      transform: translate(-2px, -2px);
+    }
+  }
+
+  .neo-btn {
+    @apply px-6 py-3 font-bold uppercase tracking-wider border-2 border-black bg-white text-black transition-all;
+    box-shadow: 4px 4px 0px 0px var(--color-brand-primary);
+
+    &:hover:not(:disabled) {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px 0px var(--color-brand-primary);
+    }
+
+    &:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px 0px var(--color-brand-primary);
+    }
+
+    &:disabled {
+      @apply opacity-50 cursor-not-allowed bg-gray-400 border-gray-600;
+      box-shadow: none;
+    }
+  }
+
+  .neo-btn-secondary {
+    @apply px-4 py-2 text-sm font-bold border-2 border-white bg-black text-white transition-all;
+
+    &:hover {
+      background-color: var(--color-brand-primary);
+      color: black;
+      border-color: var(--color-brand-primary);
+    }
+  }
+
+  .neo-tag {
+    @apply px-3 py-1 text-xs font-bold border border-white bg-black text-white uppercase tracking-wider hover:bg-white hover:text-black transition-colors cursor-pointer;
+  }
+
+  /* Motion Effects */
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 40s linear infinite;
+  }
+
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+}
