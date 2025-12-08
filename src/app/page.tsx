@@ -18,7 +18,7 @@ export default function Page() {
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-[#CCFF00] animate-pulse" />
           <h1 className="text-2xl font-bold uppercase tracking-tighter text-white select-none">
-            TERMINAL<span className="text-[#CCFF00]">_</span>DATA
+            NEXUS<span className="text-[#CCFF00]">_</span>PRICES
           </h1>
         </div>
         <ConnectWalletButton />
