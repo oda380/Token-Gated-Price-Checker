@@ -1,17 +1,28 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  // eslint config moved to eslint.config.mjs in Next.js 16
-  serverExternalPackages: [
-    '@metamask/sdk',
-    '@metamask/sdk-communication-layer',
-    '@react-native-async-storage/async-storage',
-    'wagmi',
-    '@wagmi/connectors',
-    '@wagmi/core',
-  ],
-  // Explicitly set turbopack to empty object to silence warning
-  turbopack: {},
-};
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups', // Fixes internal errors with some wallets
+          },
+        ],
+      },
+    ]
+  },
+  webpack(config) {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@react-native-async-storage/async-storage': require('path').resolve(
+        __dirname,
+        'src/shims/asyncStorage.ts'
+      ),
+    }
+    return config
+  },
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, type ChangeEvent, type KeyboardEvent, type ButtonHTMLAttributes, type ReactNode } from 'react'
 
 export type PriceFormState = {
+  mode: 'live' | 'historical' | 'compare'
   amount: string
   ticker: string
   inCurrency: 'USD' | 'EUR'
@@ -72,7 +73,31 @@ export default function PriceForm({
 
   return (
     <section className="neo-card space-y-8 text-white">
-      <h3 className="font-bold text-3xl uppercase tracking-tighter border-b-2 border-white pb-4">Price Query</h3>
+      <div className="flex flex-col space-y-4">
+        <h3 className="font-bold text-3xl uppercase tracking-tighter border-b-2 border-white pb-4">Price Query</h3>
+
+        {/* Mode Tabs */}
+        <div className="grid grid-cols-3 gap-0 border-2 border-white">
+          <ModeTab
+            active={value.mode === 'live'}
+            onClick={() => onChange({ mode: 'live' })}
+            label="LIVE"
+            icon="🔴"
+          />
+          <ModeTab
+            active={value.mode === 'historical'}
+            onClick={() => onChange({ mode: 'historical' })}
+            label="HISTORICAL"
+            icon="📅"
+          />
+          <ModeTab
+            active={value.mode === 'compare'}
+            onClick={() => onChange({ mode: 'compare' })}
+            label="COMPARE"
+            icon="📊"
+          />
+        </div>
+      </div>
 
       {/* Popular chips */}
       <div className="flex flex-wrap items-center gap-2">
@@ -169,50 +194,46 @@ export default function PriceForm({
           </select>
         </Field>
 
-        {/* UTC Timestamp */}
-        <Field label="TIMESTAMP (UTC)">
-          <div className="flex flex-wrap gap-2">
-            <input
-              type="datetime-local"
-              className="neo-input flex-1 min-w-[170px]"
-              value={value.timestampLocal}
-              onChange={set('timestampLocal')}
-            />
-            <button
-              type="button"
-              onClick={() => onChange({ timestampLocal: nowLocalForInput() })}
-              className="px-4 border-2 border-white bg-black hover:bg-white hover:text-black transition-colors"
-              title="Set to current time"
-            >
-              NOW
-            </button>
-            {value.timestampLocal && (
-              <button
-                type="button"
-                onClick={() => onChange({ timestampLocal: '' })}
-                className="px-4 border-2 border-white bg-black hover:bg-red-500 hover:border-red-500 hover:text-white transition-colors"
-                title="Clear timestamp"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        </Field>
+        {/* UTC Timestamp (Historical/Compare only) */}
+        {(value.mode === 'historical' || value.mode === 'compare') && (
+          <Field label="TIMESTAMP (UTC)">
+            <div className="flex flex-wrap gap-2">
+              <input
+                type="datetime-local"
+                className="neo-input flex-1 min-w-[170px]"
+                value={value.timestampLocal}
+                onChange={set('timestampLocal')}
+              />
+              {/* Compare Mode Presets */}
+              {value.mode === 'compare' && (
+                <div className="flex gap-1">
+                  {['-1H', '-24H', '-7D', '-30D'].map(preset => (
+                    <button
+                      key={preset}
+                      type="button"
+                      className="px-2 text-xs font-bold border border-white hover:bg-white hover:text-black transition-colors"
+                      onClick={() => {
+                        const d = new Date()
+                        if (preset === '-1H') d.setHours(d.getHours() - 1)
+                        if (preset === '-24H') d.setHours(d.getHours() - 24)
+                        if (preset === '-7D') d.setDate(d.getDate() - 7)
+                        if (preset === '-30D') d.setDate(d.getDate() - 30)
+                        onChange({ timestampLocal: toLocalIso(d) })
+                      }}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Field>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-4 pt-4 border-t-2 border-white">
-        <button className="neo-btn" onClick={onGetPrice} disabled={loading || !canSubmit}>
-          GET PRICE
-        </button>
-        <button
-          className="neo-btn"
-          onClick={() => {
-            if (value.timestampLocal) onChange({ timestampLocal: '' })
-            onPriceNow()
-          }}
-          disabled={loading || !canSubmit}
-        >
-          PRICE NOW
+        <button className="neo-btn w-full sm:w-auto" onClick={onGetPrice} disabled={loading || !canSubmit}>
+          {value.mode === 'compare' ? 'COMPARE PRICES' : 'GET PRICE'}
         </button>
         {loading && <span className="self-center text-sm font-mono text-[#CCFF00] animate-pulse">LOADING_DATA...</span>}
       </div>
@@ -272,4 +293,24 @@ function normalizeTickerInput(raw: string) {
 }
 function normalizeQuery(raw: string) {
   return raw.replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/^\$/, '').trim()
+}
+
+function ModeTab({ active, onClick, label, icon }: { active: boolean; onClick: () => void; label: string; icon: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`py-3 text-sm font-bold uppercase tracking-wider transition-all
+        ${active ? 'bg-[#CCFF00] text-black' : 'bg-black text-white hover:bg-gray-900'}
+      `}
+    >
+      <span className="mr-2">{icon}</span>
+      <span className="hidden sm:inline">{label}</span>
+    </button>
+  )
+}
+
+function toLocalIso(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }

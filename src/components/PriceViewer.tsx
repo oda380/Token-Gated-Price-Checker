@@ -4,6 +4,7 @@ import PriceForm, { type PriceFormState } from './PriceForm'
 
 export default function PriceViewer() {
   const [form, setForm] = useState<PriceFormState>({
+    mode: 'live',
     amount: '0.1',
     ticker: '',
     inCurrency: 'USD',
@@ -21,6 +22,12 @@ export default function PriceViewer() {
     perUnit?: number
     raw?: any
     suggestions?: Array<{ id: number; symbol: string; name?: string; slug: string }>
+    // Compare specific
+    isCompare?: boolean
+    thenValue?: number
+    nowValue?: number
+    change?: number
+    percent?: number
   }>(null)
 
   function localToUtcIso(datetimeLocal: string) {
@@ -36,69 +43,97 @@ export default function PriceViewer() {
     return String(raw ?? '').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/^\$/, '').trim()
   }
 
-  async function fetchConvert({ useTimestamp }: { useTimestamp: boolean }) {
-    try {
-      setLoading(true); setError(null); setResult(null)
+  async function fetchOne(timestampIso?: string) {
+    const input = normalizeTicker(form.ticker)
+    const amt = Number(form.amount)
+    const currency = form.inCurrency
+    const payload: any = { input, currency, amount: amt }
+    if (timestampIso) payload.timestamp = timestampIso
 
+    const res = await fetch('/api/price', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      cache: 'no-store'
+    })
+    const text = await res.text()
+    let json: any = null
+    try { json = JSON.parse(text) } catch { /* ignore */ }
+
+    if (!res.ok) {
+      const msg = (json && json.error) || text || `HTTP ${res.status}`
+      throw { msg, suggestions: json?.suggestions }
+    }
+    const data = json
+    if (!data?.ok || typeof data.pricePerUnit !== 'number') {
+      throw { msg: 'No price data returned' }
+    }
+    return data
+  }
+
+  async function handleGetPrice() {
+    setLoading(true); setError(null); setResult(null)
+    try {
       const input = normalizeTicker(form.ticker)
       const amt = Number(form.amount)
-      const currency = form.inCurrency
+      if (!input) throw { msg: 'Enter a ticker' }
+      if (!Number.isFinite(amt) || amt <= 0) throw { msg: 'Enter a positive amount' }
 
-      if (!input) throw new Error('Enter a ticker (e.g., BTC or “ethereum”)')
-      if (!Number.isFinite(amt) || amt <= 0) throw new Error('Enter a positive numeric amount')
+      if (form.mode === 'compare') {
+        const isoThen = localToUtcIso(form.timestampLocal)
+        if (!isoThen) throw { msg: 'Select a past date to compare' }
 
-      const payload: any = { input, currency, amount: amt }
-      if (useTimestamp) {
-        const iso = localToUtcIso(form.timestampLocal)
-        if (!iso) throw new Error('Provide a valid timestamp or click Price Now')
-        payload.timestamp = iso
-      }
+        const [rThen, rNow] = await Promise.all([
+          fetchOne(isoThen),
+          fetchOne() // live
+        ])
 
-      const res = await fetch('/api/price', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        cache: 'no-store'
-      })
+        const thenVal = rThen.total
+        const nowVal = rNow.total
+        const change = nowVal - thenVal
+        const pct = (change / thenVal) * 100
 
-      const text = await res.text()
-      let json: any = null
-      try { json = JSON.parse(text) } catch { /* non-JSON error */ }
+        setResult({
+          from: rNow.symbol ?? input.toUpperCase(),
+          amount: amt,
+          currency: form.inCurrency,
+          isCompare: true,
+          thenValue: thenVal,
+          nowValue: nowVal,
+          change,
+          percent: pct,
+          raw: { then: rThen, now: rNow }
+        })
 
-      if (!res.ok) {
-        const msg = (json && json.error) || text || `HTTP ${res.status}`
-        if (json?.suggestions?.length) {
-          setResult({
-            from: input.toUpperCase(),
-            amount: amt,
-            currency,
-            suggestions: json.suggestions,
-            raw: json
-          })
+      } else {
+        // Live or Historical
+        let iso: string | undefined
+        if (form.mode === 'historical') {
+          iso = localToUtcIso(form.timestampLocal)
+          if (!iso) throw { msg: 'Select a date' }
         }
-        throw new Error(msg)
+        const data = await fetchOne(iso)
+        setResult({
+          from: data.symbol ?? input.toUpperCase(),
+          amount: amt,
+          currency: data.convert,
+          at: data.at ?? data.lastUpdated,
+          value: data.total,
+          perUnit: data.pricePerUnit,
+          raw: data
+        })
       }
 
-      const data = json
-      if (!data?.ok || typeof data.pricePerUnit !== 'number') {
-        throw new Error('No price data returned for that ticker/currency')
+    } catch (e: any) {
+      setError(e.msg || String(e))
+      if (e.suggestions) {
+        setResult({
+          from: form.ticker,
+          amount: Number(form.amount),
+          currency: form.inCurrency,
+          suggestions: e.suggestions
+        })
       }
-
-      const perUnit = data.pricePerUnit
-      const total = data.total
-      const sym = (data.symbol as string | undefined) ?? input.toUpperCase()
-
-      setResult({
-        from: sym,
-        amount: amt,
-        currency: data.convert,
-        at: data.at ?? data.lastUpdated,
-        value: total,
-        perUnit,
-        raw: json
-      })
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false)
     }
@@ -109,8 +144,8 @@ export default function PriceViewer() {
       <PriceForm
         value={form}
         onChange={(p) => setForm({ ...form, ...p })}
-        onGetPrice={() => fetchConvert({ useTimestamp: true })}
-        onPriceNow={() => fetchConvert({ useTimestamp: false })}
+        onGetPrice={handleGetPrice}
+        onPriceNow={() => { /* no-op, single button now */ }}
         loading={loading}
       />
 
@@ -143,15 +178,39 @@ export default function PriceViewer() {
       {result && (result.value != null) && (
         <div className="neo-card space-y-4 text-white">
           <h4 className="font-bold text-2xl uppercase tracking-tighter border-b-2 border-white pb-2">Result</h4>
-          <p className="text-base text-gray-300">
-            <strong className="text-purple-400">{result.amount} {result.from}</strong>
-            {' '}= <strong className="text-white">{result.currency} {fmt2(result.value)}</strong>
-            {' '}
-            {result.at ? <>@ <span className="text-gray-400">{result.at} UTC</span></> : <>@ <span className="text-gray-400">now</span></>}
-            {result.perUnit != null && (
-              <> &nbsp;(<span className="text-gray-400">≈ {result.currency} {fmt2(result.perUnit)} / 1 {result.from}</span>)</>
-            )}
-          </p>
+
+          {result.isCompare ? (
+            <div className="space-y-4 font-mono">
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm sm:text-base">
+                <span className="text-gray-400">THEN:</span>
+                <span>{result.currency} {fmt2(result.thenValue!)}</span>
+                <span className="text-gray-400">NOW:</span>
+                <span>{result.currency} {fmt2(result.nowValue!)}</span>
+              </div>
+              <div className="border-t border-gray-700 pt-2">
+                <div className="text-lg">
+                  CHANGE: <span className={result.change! >= 0 ? 'text-[#CCFF00]' : 'text-red-500'}>
+                    {result.change! >= 0 ? '+' : ''}{fmt2(result.change!)} {result.currency}
+                  </span>
+                </div>
+                <div className="text-2xl font-bold">
+                  <span className={result.percent! >= 0 ? 'text-[#CCFF00]' : 'text-red-500'}>
+                    {result.percent! >= 0 ? '▲' : '▼'} {fmt2(Math.abs(result.percent!))}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-base text-gray-300">
+              <strong className="text-purple-400">{result.amount} {result.from}</strong>
+              {' '}= <strong className="text-white">{result.currency} {fmt2(result.value!)}</strong>
+              {' '}
+              {result.at ? <>@ <span className="text-gray-400">{new Date(result.at).toLocaleString()}</span></> : <>@ <span className="text-gray-400">now</span></>}
+              {result.perUnit != null && (
+                <> &nbsp;(<span className="text-gray-400">≈ {result.currency} {fmt2(result.perUnit)} / 1 {result.from}</span>)</>
+              )}
+            </p>
+          )}
 
           <details className="text-xs text-gray-500">
             <summary className="cursor-pointer font-semibold">Raw</summary>
