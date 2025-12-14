@@ -3,6 +3,9 @@ import { Space_Grotesk } from 'next/font/google'
 import ContextProvider from '@/context/provider'
 import './globals.css'
 
+import { Analytics } from "@vercel/analytics/next"
+import Footer from '@/components/Footer'
+
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -14,7 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className={`${spaceGrotesk.className} bg-black text-white antialiased selection:bg-[#CCFF00] selection:text-black`}>
-        <ContextProvider>{children}</ContextProvider>
+        <ContextProvider>
+          {children}
+          <Footer />
+        </ContextProvider>
+        <Analytics />
       </body>
     </html>
   )
